@@ -1,16 +1,6 @@
 # ultera_shopping
 
-A new Flutter project.
 
-## Getting Started
+I have used Riverpod for state management. It is my favourite solution and i felt it better than Provider and GetX. Due to riverpod's features such as data caching, .select (to selectively listening to items state - like used in product_list_page.dart) and accessing data of another provider inside a provider.. etc.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+The UI is very minimal and built using AI since it was not a criteria, and i personally delegate such 'boilerplate' tasks to AI for better efficiency.

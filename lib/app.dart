@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ultera_shopping/features/cart/presentation/cart_controller.dart';
 import 'package:ultera_shopping/features/cart/presentation/checkout_page.dart';
 import 'package:ultera_shopping/features/products/presentation/product_list_page.dart';
 
@@ -39,6 +40,19 @@ class _BottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget badgedIcon(IconData icon) {
+      return Consumer(
+        builder: (context, ref, child) {
+          int cartProductsCount = ref.watch(cartItemsProvider).length;
+          return Badge(
+            isLabelVisible: cartProductsCount != 0, //hide on zero items
+            label: Text(cartProductsCount.toString()),
+            child: Icon(icon),
+          );
+        },
+      );
+    }
+
     return BottomNavigationBar(
       currentIndex: currentIndex,
       onTap: onTap,
@@ -56,9 +70,5 @@ class _BottomNavBar extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  Widget badgedIcon(IconData icon) {
-    return Badge(label: Text('1'), child: Icon(icon));
   }
 }

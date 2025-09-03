@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
 class Product {
@@ -34,4 +35,19 @@ class Product {
     required this.price,
     required this.id,
   });
+
+  @override
+  bool operator ==(covariant Product other) {
+    if (identical(this, other)) return true;
+
+    return other.name == name &&
+        other.id == id &&
+        other.imageLink == imageLink &&
+        other.price == price;
+  }
+
+  @override
+  int get hashCode {
+    return name.hashCode ^ id.hashCode ^ imageLink.hashCode ^ price.hashCode;
+  }
 }

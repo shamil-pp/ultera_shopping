@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ultera_shopping/features/cart/presentation/cart_controller.dart';
+import 'package:ultera_shopping/features/cart/presentation/cart_product_state.dart';
 import 'package:ultera_shopping/features/products/data/product_repo.dart';
 import 'package:ultera_shopping/features/products/domain/product.dart';
 import 'package:ultera_shopping/utils/constants.dart';
@@ -9,23 +11,23 @@ class CheckoutPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final List<Product> products = ProductRepo().getProducts();
+    List<CartProduct> cartItems = ref.watch(cartItemsProvider);
 
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(title: const Text('Checkout'), centerTitle: true),
-        body: products.isEmpty
+        body: cartItems.isEmpty
             ? const _EmptyCart()
             : Column(
                 children: [
                   Expanded(
                     child: ListView.separated(
                       padding: const EdgeInsets.all(12),
-                      itemCount: products.length,
+                      itemCount: cartItems.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 8),
                       itemBuilder: (context, index) {
-                        final Product product = products[index];
-                        return _CartTile(product: product);
+                        final CartProduct product = cartItems[index];
+                        return _CartTile(item: product);
                       },
                     ),
                   ),
@@ -43,7 +45,7 @@ class CheckoutPage extends ConsumerWidget {
                         ),
                         const Spacer(),
                         Text(
-                          '${Constants.currency}${0.toStringAsFixed(0)}',
+                          '${Constants.currency}${ref.read(cartItemsProvider.notifier).getCartSubtotal()}',
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
@@ -58,17 +60,17 @@ class CheckoutPage extends ConsumerWidget {
 }
 
 class _CartTile extends ConsumerWidget {
-  final Product product;
+  final CartProduct item;
 
-  const _CartTile({required this.product});
+  const _CartTile({required this.item});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      title: Text(product.name),
+      contentPadding: const EdgeInsets.symmetric(vertical: 4),
+      title: Text(item.product.name),
       subtitle: Text(
-        '${Constants.currency}${product.price.toStringAsFixed(0)}',
+        '${Constants.currency}${item.product.price.toStringAsFixed(0)}',
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -80,11 +82,60 @@ class _CartTile extends ConsumerWidget {
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Text('1'),
+              child: Row(
+                children: [
+                  Consumer(
+                    builder: (context, ref, child) {
+                      bool show =
+                          ref
+                              .watch(cartItemsProvider)
+                              .firstWhere((element) => element == item)
+                              .quantity >
+                          1;
+
+                      return Visibility(
+                        visible: show,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 4),
+                          child: GestureDetector(
+                            onTap: () => ref
+                                .read(cartItemsProvider.notifier)
+                                .decreaseQuanity(item),
+                            child: Icon(Icons.remove, size: 16),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                      item.quantity.toString(),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 4),
+                    child: GestureDetector(
+                      onTap: () => ref
+                          .read(cartItemsProvider.notifier)
+                          .increaseQuantity(item),
+                      child: Icon(Icons.add, size: 16),
+                    ),
+                  ),
+                ],
+              ),
             ),
           IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.delete_outline),
+            onPressed: () {
+              ref
+                  .read(cartItemsProvider.notifier)
+                  .addOrRemoveFromCart(item.product);
+            },
+            icon: const Icon(Icons.delete_outline, color: Colors.red),
             tooltip: 'Remove',
           ),
         ],

@@ -1,17 +1,23 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ultera_shopping/features/cart/presentation/cart_controller.dart';
 import 'package:ultera_shopping/features/products/data/product_repo.dart';
 import 'package:ultera_shopping/features/products/domain/product.dart';
 import 'package:ultera_shopping/utils/constants.dart';
 
-class ProductListPage extends ConsumerWidget {
+class ProductListPage extends StatefulWidget {
   const ProductListPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final List<Product> products = ProductRepo().getProducts();
+  State<ProductListPage> createState() => _ProductListPageState();
+}
 
+class _ProductListPageState extends State<ProductListPage> {
+  final List<Product> products = ProductRepo().products;
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Products'), centerTitle: true),
       body: ListView.builder(
@@ -33,8 +39,6 @@ class _ProductCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final bool isInCart = true;
-
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -71,22 +75,36 @@ class _ProductCard extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: SizedBox(
-                      height: 40,
-                      child: ElevatedButton.icon(
-                        onPressed: () {},
-                        icon: Icon(
-                          isInCart
-                              ? Icons.remove_shopping_cart
-                              : Icons.add_shopping_cart,
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final bool isProductCarted = ref.watch(
+                        cartItemsProvider.select(
+                          (items) =>
+                              items.any((item) => item.product == product),
                         ),
-                        label: Text(
-                          isInCart ? 'Remove from Cart' : 'Add to Cart',
+                      );
+                      return Align(
+                        alignment: Alignment.centerLeft,
+                        child: SizedBox(
+                          height: 40,
+                          child: ElevatedButton.icon(
+                            onPressed: () => ref
+                                .read(cartItemsProvider.notifier)
+                                .addOrRemoveFromCart(product),
+                            icon: Icon(
+                              isProductCarted
+                                  ? Icons.remove_shopping_cart
+                                  : Icons.add_shopping_cart,
+                            ),
+                            label: Text(
+                              isProductCarted
+                                  ? 'Remove from Cart'
+                                  : 'Add to Cart',
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
+                      );
+                    },
                   ),
                 ],
               ),
