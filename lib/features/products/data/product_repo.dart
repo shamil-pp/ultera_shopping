@@ -33,6 +33,13 @@ class ProductRepo {
         id: Utils.generateRandomId(),
         price: 34999,
       ),
+      Product(
+        name: 'KTM Enduro 390 Motercycle/Bike Orange',
+        imageLink:
+            'https://m.media-amazon.com/images/I/71fvH2BN9-L._SX522_.jpg',
+        price: 89999,
+        id: Utils.generateRandomId(),
+      ),
     ];
   }
 }
